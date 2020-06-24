@@ -28,10 +28,12 @@ type DebugWriter struct {
 
 func (w *DebugWriter) Write(in []interface{}) error {
 	for _, i := range in {
-		v := i.(*dynamodb.AttributeValue)
-		_, err := os.Stdout.Write([]byte(fmt.Sprintf("%v\n", v.GoString())))
-		if err != nil {
-			return err
+		m := i.(map[string]*dynamodb.AttributeValue)
+		for k, v := range m {
+			_, err := os.Stdout.Write([]byte(fmt.Sprintf("%s %v\n", k, v.GoString())))
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil

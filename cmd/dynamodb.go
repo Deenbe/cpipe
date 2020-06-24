@@ -22,16 +22,27 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var table string
+
 // dynamodbCmd represents the dynamodb command
 var dynamodbCmd = &cobra.Command{
 	Use:   "dynamodb",
 	Short: "Stream data into dynamodb",
 	Long:  ``,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		writer := dynamodb.NewDebugWriter()
+		var writer core.Writer
+		if enableDebugWriter {
+			writer = dynamodb.NewDebugWriter()
+		} else {
+			writer = dynamodb.NewWriter(table)
+		}
+
 		transformer := &dynamodb.Transformer{}
 		deserializer := &core.JsonDeserializer{}
-		core.Start("", deserializer, transformer, writer, 1, 256, 10)
+		if batchSize > 25 {
+			batchSize = 25
+		}
+		core.Start("", deserializer, transformer, writer, batchSize, maxWriters, flushTimeoutSeconds)
 		return nil
 	},
 }
@@ -47,5 +58,6 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// dynamodbCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	dynamodbCmd.Flags().StringVar(&table, "table", "", "dynamodb table name")
+	dynamodbCmd.MarkFlagRequired("table")
 }

@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"runtime"
 
 	"github.com/spf13/cobra"
 
@@ -26,6 +27,10 @@ import (
 )
 
 var cfgFile string
+var maxWriters int
+var batchSize int
+var flushTimeoutSeconds int
+var enableDebugWriter bool
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -54,6 +59,10 @@ func init() {
 	// will be global for your application.
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cpipe.yaml)")
+	rootCmd.PersistentFlags().IntVar(&maxWriters, "max-writers", calculateDefaultMaxWriters(), "max number of concurrent writers")
+	rootCmd.PersistentFlags().IntVar(&batchSize, "batch-size", 1, "number of items in a batch")
+	rootCmd.PersistentFlags().IntVar(&flushTimeoutSeconds, "flush-timeout-seconds", 10, "number of seconds to wait before an unfilled batch is written")
+	rootCmd.PersistentFlags().BoolVar(&enableDebugWriter, "enable-debug-writer", false, "enable debug writer to output batches to console")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -84,4 +93,8 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+func calculateDefaultMaxWriters() int {
+	return runtime.NumCPU() * 256
 }

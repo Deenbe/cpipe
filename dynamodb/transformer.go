@@ -22,5 +22,11 @@ type Transformer struct {
 }
 
 func (t *Transformer) Transform(in interface{}) (interface{}, error) {
-	return dynamodbattribute.Marshal(in)
+	var m map[string]interface{}
+	if k, ok := in.(map[string]interface{}); !ok {
+		m = map[string]interface{}{"item": in}
+	} else {
+		m = k
+	}
+	return dynamodbattribute.MarshalMap(m)
 }

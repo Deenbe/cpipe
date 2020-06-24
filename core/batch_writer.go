@@ -109,7 +109,7 @@ func NewBatchWriter(input <-chan interface{}, batchSize, maxWriters int, timer <
 		batchSize:  batchSize,
 		maxWriters: maxWriters,
 		timer:      timer,
-		done:       make(chan error, batchSize),
+		done:       make(chan error, maxWriters),
 		writer:     writer,
 	}
 }

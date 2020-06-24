@@ -47,8 +47,14 @@ func Start(file string, deserializer Deserializer, transformer Transformer, writ
 	go p.Start(ctx, reader)
 
 	select {
-	case <-bw.Done():
-	case <-p.Done():
+	case e := <-bw.Done():
+		if e != nil {
+			log.Error(e)
+		}
+	case e := <-p.Done():
+		if e != nil {
+			log.Error(e)
+		}
 	case <-chanSignal:
 	}
 

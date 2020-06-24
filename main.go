@@ -16,7 +16,7 @@ limitations under the License.
 
 package main
 
-import "github.com/deenbe/cpipe/cmd"
+import "cpipe/cmd"
 
 func main() {
 	cmd.Execute()

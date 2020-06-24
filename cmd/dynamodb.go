@@ -16,7 +16,8 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
+	"cpipe/core"
+	"cpipe/dynamodb"
 
 	"github.com/spf13/cobra"
 )
@@ -24,15 +25,14 @@ import (
 // dynamodbCmd represents the dynamodb command
 var dynamodbCmd = &cobra.Command{
 	Use:   "dynamodb",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("dynamodb called")
+	Short: "Stream data into dynamodb",
+	Long:  ``,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		writer := dynamodb.NewDebugWriter()
+		transformer := &dynamodb.Transformer{}
+		deserializer := &core.JsonDeserializer{}
+		core.Start("", deserializer, transformer, writer, 1, 256, 10)
+		return nil
 	},
 }
 

@@ -16,18 +16,15 @@ limitations under the License.
 
 package core
 
-// Writer is the interface between a data stream and a destination service.
-type Writer interface {
-	Write([]interface{}) error
+import (
+	"encoding/json"
+)
+
+type JsonDeserializer struct {
 }
 
-// Deserializer converts input data to a map with typed information.
-type Deserializer interface {
-	Deserialize(string) (interface{}, error)
-}
-
-// Transformer transforms an input data into a specific structure required by
-// writer.
-type Transformer interface {
-	Transform(interface{}) (interface{}, error)
+func (d *JsonDeserializer) Deserialize(in string) (interface{}, error) {
+	var result interface{}
+	err := json.Unmarshal([]byte(in), &result)
+	return result, err
 }

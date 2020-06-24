@@ -14,20 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package core
+package dynamodb
 
-// Writer is the interface between a data stream and a destination service.
-type Writer interface {
-	Write([]interface{}) error
+import (
+	"fmt"
+	"os"
+
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+)
+
+type DebugWriter struct {
 }
 
-// Deserializer converts input data to a map with typed information.
-type Deserializer interface {
-	Deserialize(string) (interface{}, error)
+func (w *DebugWriter) Write(in []interface{}) error {
+	for _, i := range in {
+		v := i.(*dynamodb.AttributeValue)
+		_, err := os.Stdout.Write([]byte(fmt.Sprintf("%v\n", v.GoString())))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-// Transformer transforms an input data into a specific structure required by
-// writer.
-type Transformer interface {
-	Transform(interface{}) (interface{}, error)
+func NewDebugWriter() *DebugWriter {
+	return &DebugWriter{}
 }

@@ -14,20 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package core
+package dynamodb
 
-// Writer is the interface between a data stream and a destination service.
-type Writer interface {
-	Write([]interface{}) error
+import "github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+
+type Transformer struct {
 }
 
-// Deserializer converts input data to a map with typed information.
-type Deserializer interface {
-	Deserialize(string) (interface{}, error)
-}
-
-// Transformer transforms an input data into a specific structure required by
-// writer.
-type Transformer interface {
-	Transform(interface{}) (interface{}, error)
+func (t *Transformer) Transform(in interface{}) (interface{}, error) {
+	return dynamodbattribute.Marshal(in)
 }

@@ -18,11 +18,13 @@ package cmd
 import (
 	"cpipe/core"
 	"cpipe/dynamodb"
+	"time"
 
 	"github.com/spf13/cobra"
 )
 
 var table string
+var retryDelaySeconds int
 
 // dynamodbCmd represents the dynamodb command
 var dynamodbCmd = &cobra.Command{
@@ -34,7 +36,7 @@ var dynamodbCmd = &cobra.Command{
 		if enableDebugWriter {
 			writer = dynamodb.NewDebugWriter()
 		} else {
-			writer = dynamodb.NewWriter(table)
+			writer = dynamodb.NewWriter(table, time.Duration(retryDelaySeconds)*time.Second)
 		}
 
 		transformer := &dynamodb.Transformer{}
@@ -59,5 +61,6 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	dynamodbCmd.Flags().StringVar(&table, "table", "", "dynamodb table name")
+	dynamodbCmd.Flags().IntVar(&retryDelaySeconds, "retry-delay-seconds", 5, "number of seconds to wait before resending unprocessed items in a batch")
 	dynamodbCmd.MarkFlagRequired("table")
 }

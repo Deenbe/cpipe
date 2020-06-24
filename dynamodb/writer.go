@@ -17,13 +17,18 @@ limitations under the License.
 package dynamodb
 
 import (
+	"net/http"
+	"time"
+
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
 type Writer struct {
-	table     string
-	ddbClient *dynamodb.DynamoDB
+	table      string
+	ddbClient  *dynamodb.DynamoDB
+	retryDelay time.Duration
 }
 
 func (w *Writer) Write(in []interface{}) error {
@@ -50,16 +55,45 @@ func (w *Writer) writeAll(requests map[string][]*dynamodb.WriteRequest) error {
 			return err
 		}
 		requests = output.UnprocessedItems
+		if len(requests) > 0 {
+			time.Sleep(w.retryDelay)
+		}
 	}
 
 	return nil
 }
 
-func NewWriter(table string) *Writer {
-	s := session.Must(session.NewSessionWithOptions(session.Options{}))
+type HTTPClientSettings struct {
+	Connect          time.Duration
+	ConnKeepAlive    time.Duration
+	ExpectContinue   time.Duration
+	IdleConn         time.Duration
+	MaxAllIdleConns  int
+	MaxHostIdleConns int
+	ResponseHeader   time.Duration
+	TLSHandshake     time.Duration
+}
+
+func optimisedHTTPClient() *http.Client {
+	drp := http.DefaultTransport
+	dt := drp.(*http.Transport)
+	t := *dt
+	t.MaxIdleConns = 100
+	t.MaxIdleConnsPerHost = 100
+
+	return &http.Client{
+		Transport: &t,
+	}
+}
+
+func NewWriter(table string, retryDelay time.Duration) *Writer {
+	s := session.Must(session.NewSession(&aws.Config{
+		HTTPClient: optimisedHTTPClient(),
+	}))
 	c := dynamodb.New(s)
 	return &Writer{
-		table:     table,
-		ddbClient: c,
+		table:      table,
+		ddbClient:  c,
+		retryDelay: retryDelay,
 	}
 }

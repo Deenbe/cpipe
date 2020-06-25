@@ -4,8 +4,11 @@
 
 ![Build and Release](https://github.com/buddyspike/cpipe/workflows/Build%20and%20Release/badge.svg)
 
-## Install
+## Install cpipe
 
+```sh
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Deenbe/cpipe/master/install.sh)"
+```
 
 ## Usage
 

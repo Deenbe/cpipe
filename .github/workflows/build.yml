@@ -1,15 +1,17 @@
-name: Build
+name: Build and Release
 
 on:
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  release:
+    types: [created]
 
 jobs:
 
-  build:
-    name: Build
+  build-and-release:
+    name: Build and Release
     runs-on: ubuntu-latest
     steps:
 
@@ -25,9 +27,13 @@ jobs:
     - name: Get dependencies
       run: |
         go get -v -t -d ./...
-
-    - name: Test
-      run: make test
-
-    - name: Build
+    - name: Run build script
       run: ./build.sh
+
+    - name: Publish binaries
+      if: github.event_name == 'release'
+      uses: skx/github-action-publish-binaries@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        args: 'build/cpipe_*'

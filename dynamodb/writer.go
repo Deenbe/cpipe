@@ -17,6 +17,7 @@ limitations under the License.
 package dynamodb
 
 import (
+	"net"
 	"net/http"
 	"time"
 
@@ -63,26 +64,25 @@ func (w *Writer) writeAll(requests map[string][]*dynamodb.WriteRequest) error {
 	return nil
 }
 
-type HTTPClientSettings struct {
-	Connect          time.Duration
-	ConnKeepAlive    time.Duration
-	ExpectContinue   time.Duration
-	IdleConn         time.Duration
-	MaxAllIdleConns  int
-	MaxHostIdleConns int
-	ResponseHeader   time.Duration
-	TLSHandshake     time.Duration
-}
-
 func optimisedHTTPClient() *http.Client {
-	drp := http.DefaultTransport
-	dt := drp.(*http.Transport)
-	t := *dt
-	t.MaxIdleConns = 100
-	t.MaxIdleConnsPerHost = 100
+	// TODO: Make this configurable
+	t := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+			DualStack: true,
+		}).DialContext,
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          100,
+		MaxConnsPerHost:       100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+	}
 
 	return &http.Client{
-		Transport: &t,
+		Transport: t,
 	}
 }
 

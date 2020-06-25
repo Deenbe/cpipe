@@ -41,10 +41,11 @@ var dynamodbCmd = &cobra.Command{
 
 		transformer := &dynamodb.Transformer{}
 		deserializer := &core.JsonDeserializer{}
-		if batchSize > 25 {
-			batchSize = 25
+		config := &core.Config{File: "", BatchSize: batchSize, MaxWriters: maxWriters, AutoFlushTimeoutSeconds: flushTimeoutSeconds}
+		if config.BatchSize > 25 {
+			config.BatchSize = 25
 		}
-		core.Start("", deserializer, transformer, writer, batchSize, maxWriters, flushTimeoutSeconds)
+		core.Start(deserializer, transformer, writer, config)
 		return nil
 	},
 }

@@ -31,3 +31,11 @@ type Deserializer interface {
 type Transformer interface {
 	Transform(interface{}) (interface{}, error)
 }
+
+// Config used to pass core configuration parameters around.
+type Config struct {
+	File                    string
+	MaxWriters              int
+	BatchSize               int
+	AutoFlushTimeoutSeconds int
+}

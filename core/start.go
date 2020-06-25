@@ -25,19 +25,19 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func Start(file string, deserializer Deserializer, transformer Transformer, writer Writer, batchSize, maxWriters, timeoutSeconds int) {
+func Start(deserializer Deserializer, transformer Transformer, writer Writer, config *Config) {
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	chanSignal := make(chan os.Signal, 1)
 	c := make(chan interface{})
-	bw := NewBatchWriter(c, batchSize, maxWriters, time.After(time.Second*time.Duration(timeoutSeconds)), writer)
+	bw := NewBatchWriter(c, config.BatchSize, config.MaxWriters, time.After(time.Second*time.Duration(config.AutoFlushTimeoutSeconds)), writer)
 	p := NewPump(deserializer, transformer, c)
 
 	signal.Notify(chanSignal, os.Interrupt)
 
 	reader := os.Stdin
-	if file != "" {
+	if config.File != "" {
 		var err error
-		reader, err = os.Open(file)
+		reader, err = os.Open(config.File)
 		if err != nil {
 			panic(err)
 		}

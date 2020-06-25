@@ -17,4 +17,5 @@ if [[ "$BINARY" = "" ]]; then
 fi
 
 curl -o /usr/local/bin/cpipe -L "https://github.com/Deenbe/cpipe/releases/latest/download/$BINARY" 
+chmod +x /usr/local/bin/cpipe
 

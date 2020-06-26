@@ -31,7 +31,7 @@ for (let i = 0; i < 100; i++) {
 ```
 
 ```sh
-./gen.js | cpipe dynamodb --table dc_crowd
+./gen.js | cpipe dynamodb --table sensor_data
 ```
 
 

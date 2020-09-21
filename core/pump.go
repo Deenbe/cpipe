@@ -41,13 +41,13 @@ func (p *Pump) Start(ctx context.Context, reader io.Reader) {
 				p.exit(nil)
 				return
 			}
-			deserialized, err := p.deserializer.Deserialize(scanner.Text())
+			input := scanner.Text()
+			data, err := p.deserializer.Deserialize(input)
 			if err != nil {
-				p.exit(err)
-				return
+				data = input
 			}
 
-			transformed, err := p.transformer.Transform(deserialized)
+			transformed, err := p.transformer.Transform(data)
 			if err != nil {
 				p.exit(err)
 				return

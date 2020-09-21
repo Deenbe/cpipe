@@ -17,11 +17,8 @@ limitations under the License.
 package dynamodb
 
 import (
-	"net"
-	"net/http"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
@@ -64,32 +61,7 @@ func (w *Writer) writeAll(requests map[string][]*dynamodb.WriteRequest) error {
 	return nil
 }
 
-func optimisedHTTPClient() *http.Client {
-	// TODO: Make this configurable
-	t := &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-		DialContext: (&net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
-			DualStack: true,
-		}).DialContext,
-		ForceAttemptHTTP2:     true,
-		MaxIdleConns:          100,
-		MaxConnsPerHost:       100,
-		IdleConnTimeout:       90 * time.Second,
-		TLSHandshakeTimeout:   10 * time.Second,
-		ExpectContinueTimeout: 1 * time.Second,
-	}
-
-	return &http.Client{
-		Transport: t,
-	}
-}
-
-func NewWriter(table string, retryDelay time.Duration) *Writer {
-	s := session.Must(session.NewSession(&aws.Config{
-		HTTPClient: optimisedHTTPClient(),
-	}))
+func NewWriter(s *session.Session, table string, retryDelay time.Duration) *Writer {
 	c := dynamodb.New(s)
 	return &Writer{
 		table:      table,

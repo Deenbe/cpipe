@@ -18,6 +18,7 @@ package cmd
 import (
 	"cpipe/core"
 	"cpipe/dynamodb"
+	"cpipe/utils"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -36,7 +37,7 @@ var dynamodbCmd = &cobra.Command{
 		if enableDebugWriter {
 			writer = dynamodb.NewDebugWriter()
 		} else {
-			writer = dynamodb.NewWriter(table, time.Duration(retryDelaySeconds)*time.Second)
+			writer = dynamodb.NewWriter(utils.NewSDKSession(), table, time.Duration(retryDelaySeconds)*time.Second)
 		}
 
 		transformer := &dynamodb.Transformer{}
